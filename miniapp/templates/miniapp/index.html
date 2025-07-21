@@ -405,16 +405,27 @@
                     await authenticateUser(user, initData);
                 } else {
                     // Демо-режим
+                    const demoMemberSince = new Date(Date.now() - 15 * 24 * 60 * 60 * 1000);
                     const demoUser = {
                         id: 123456789,
+                        telegram_id: 123456789,
                         first_name: "Иван",
                         last_name: "Иванов",
+                        full_name: "Иван Иванов",
                         username: "ivan_demo",
                         language_code: "ru",
-                        is_premium: false
+                        is_premium: false,
+                        days_since_join: 15,
+                        member_since: demoMemberSince.toISOString()
                     };
+                    
                     currentUser = demoUser;
                     displayUserData(demoUser);
+                    displayStats({
+                        total_visits: 42,
+                        last_visit: new Date().toISOString(),
+                        member_since: demoMemberSince.toISOString()
+                    });
                     loadAvatar(demoUser.id);
                     document.getElementById('status').textContent = 'Демо-режим';
                 }
@@ -482,10 +493,38 @@
             }
         }
 
+        function displayUserData(user) {
+            const avatarPlaceholder = document.getElementById('avatarPlaceholder');
+            const username = document.getElementById('username');
+
+            if (user.first_name) {
+                avatarPlaceholder.textContent = user.first_name.charAt(0).toUpperCase();
+                username.textContent = user.full_name || user.first_name;
+            }
+
+            document.getElementById('userId').textContent = user.id || user.telegram_id || '-';
+            document.getElementById('firstName').textContent = user.first_name || '-';
+            document.getElementById('lastName').textContent = user.last_name || '-';
+            document.getElementById('userUsername').textContent = user.username ? '@' + user.username : '-';
+            document.getElementById('languageCode').textContent = user.language_code || '-';
+            document.getElementById('isPremium').textContent = user.is_premium ? 'Да ⭐' : 'Нет';
+            
+            // ИСПРАВЛЕНИЕ: Правильное отображение дней с регистрации
+            const daysValue = user.days_since_join !== undefined && user.days_since_join !== null ? 
+                user.days_since_join : 
+                (user.member_since ? Math.floor((new Date() - new Date(user.member_since)) / (1000 * 60 * 60 * 24)) : '-');
+            
+            document.getElementById('daysSinceJoin').textContent = daysValue;
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('userData').style.display = 'block';
+        }
+
         function displayStats(stats) {
             if (stats) {
                 document.getElementById('totalVisits').textContent = stats.total_visits || '-';
                 
+                // ИСПРАВЛЕНИЕ: Правильный расчет дней с регистрации для статистики
                 let daysSinceJoin = '-';
                 if (stats.member_since) {
                     const memberSince = new Date(stats.member_since);
@@ -494,24 +533,13 @@
                 }
                 document.getElementById('daysSinceJoinStat').textContent = daysSinceJoin;
                 
+                // Последний визит
                 if (stats.last_visit) {
                     const lastVisit = new Date(stats.last_visit);
                     document.getElementById('lastVisit').textContent = 
                         lastVisit.toLocaleDateString('ru-RU') + ' ' + 
                         lastVisit.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'});
                 }
-            }
-        }
-
-        function displayStats(stats) {
-            if (stats) {
-                document.getElementById('totalVisits').textContent = stats.total_visits || '-';
-                document.getElementById('daysSinceJoinStat').textContent = 
-                    Math.floor((new Date() - new Date(stats.member_since)) / (1000 * 60 * 60 * 24)) || '-';
-                
-                const lastVisit = new Date(stats.last_visit);
-                document.getElementById('lastVisit').textContent = 
-                    lastVisit.toLocaleDateString('ru-RU') + ' ' + lastVisit.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'});
             }
         }
 
