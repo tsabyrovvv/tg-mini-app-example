@@ -604,11 +604,61 @@
         }
 
         function shareApp() {
-            if (tg.platform !== 'unknown') {
-                tg.shareUrl(window.location.href, 'Попробуйте это Telegram Mini App!');
+            if (window.Telegram && window.Telegram.WebApp && tg.platform !== 'unknown') {
+                try {
+                    tg.shareUrl(window.location.href, 'Попробуйте это Telegram Mini App!');
+                } catch (error) {
+                    console.error('Ошибка при попытке поделиться через Telegram:', error);
+                    fallbackShare();
+                }
             } else {
-                alert('Функция доступна только в Telegram');
+                fallbackShare();
             }
+        }
+
+        function fallbackShare() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Telegram Mini App',
+                    text: 'Попробуйте это Telegram Mini App!',
+                    url: window.location.href
+                }).catch(error => {
+                    console.log('Ошибка при использовании Web Share API:', error);
+                    copyToClipboardShare();
+                });
+            } else {
+                copyToClipboardShare();
+            }
+        }
+
+        function copyToClipboardShare() {
+            const shareText = `Попробуйте это Telegram Mini App!\n${window.location.href}`;
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(shareText).then(() => {
+                    alert('Ссылка скопирована в буфер обмена!');
+                }).catch(() => {
+                    manualCopyShare(shareText);
+                });
+            } else {
+                manualCopyShare(shareText);
+            }
+        }
+
+        function manualCopyShare(text) {
+            const tempInput = document.createElement('textarea');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            
+            try {
+                document.execCommand('copy');
+                alert('Ссылка скопирована в буфер обмена!');
+            } catch (error) {
+                alert(`Не удалось скопировать автоматически. Скопируйте вручную:\n${text}`);
+            }
+            
+            document.body.removeChild(tempInput);
         }
 
         function showAlert() {
@@ -620,12 +670,41 @@
         }
 
         function vibrate() {
-            if (tg.platform !== 'unknown') {
-                tg.HapticFeedback.impactOccurred('medium');
-            } else if (navigator.vibrate) {
-                navigator.vibrate(200);
-            } else {
-                alert('Вибрация не поддерживается');
+            let vibrated = false;
+            
+            if (window.Telegram && window.Telegram.WebApp && tg.platform !== 'unknown') {
+                try {
+                    tg.HapticFeedback.impactOccurred('medium');
+                    vibrated = true;
+                    console.log('Вибрация через Telegram WebApp');
+                } catch (error) {
+                    console.error('Ошибка вибрации Telegram:', error);
+                }
+            }
+            
+            if (!vibrated && navigator.vibrate) {
+                try {
+                    navigator.vibrate([200, 100, 200]);
+                    vibrated = true;
+                    console.log('Вибрация через браузер');
+                } catch (error) {
+                    console.error('Ошибка браузерной вибрации:', error);
+                }
+            }
+            
+            if (!vibrated) {
+                const button = event.target;
+                const originalBg = button.style.backgroundColor;
+                
+                button.style.backgroundColor = 'var(--tg-theme-hint-color, #ccc)';
+                button.style.transform = 'scale(0.95)';
+                
+                setTimeout(() => {
+                    button.style.backgroundColor = originalBg;
+                    button.style.transform = 'scale(1)';
+                }, 150);
+                
+                console.log('Вибрация не поддерживается, использован визуальный фидбек');
             }
         }
 
