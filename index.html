@@ -16,13 +16,14 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--tg-theme-bg-color, #ffffff);
             color: var(--tg-theme-text-color, #000000);
-            padding: 16px;
             min-height: 100vh;
+            padding-bottom: 80px;
         }
 
         .container {
             max-width: 400px;
             margin: 0 auto;
+            padding: 16px;
         }
 
         .header {
@@ -42,6 +43,40 @@
         .header p {
             font-size: 14px;
             opacity: 0.7;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 16px;
+            background: var(--tg-theme-button-color, #007bff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--tg-theme-button-text-color, #ffffff);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .avatar-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .data-card {
@@ -78,28 +113,150 @@
             word-break: break-word;
         }
 
-        .avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            margin: 0 auto 16px;
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            background: var(--tg-theme-secondary-bg-color, #f8f9fa);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--tg-theme-button-color, #007bff);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        .action-button {
             background: var(--tg-theme-button-color, #007bff);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 8px;
+            transition: opacity 0.2s;
+        }
+
+        .action-button:hover {
+            opacity: 0.8;
+        }
+
+        .action-button:active {
+            opacity: 0.6;
+        }
+
+        .settings-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+            cursor: pointer;
+        }
+
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+
+        .settings-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 12px;
+            background: var(--tg-theme-button-color, #007bff);
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 32px;
-            font-weight: bold;
-            color: var(--tg-theme-button-text-color, #ffffff);
+            font-size: 12px;
+            color: white;
         }
 
-        .status {
-            padding: 12px;
-            text-align: center;
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            border-radius: 8px;
+        .settings-content {
+            flex: 1;
+        }
+
+        .settings-title {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .settings-description {
             font-size: 12px;
-            opacity: 0.7;
-            margin-top: 16px;
+            opacity: 0.6;
+            margin-top: 2px;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--tg-theme-bg-color, #ffffff);
+            border-top: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 4px 12px;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+            min-width: 60px;
+        }
+
+        .nav-item:hover {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+        }
+
+        .nav-item.active {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 500;
+            text-align: center;
         }
 
         .loading {
@@ -116,64 +273,161 @@
             text-align: center;
             margin-bottom: 16px;
         }
+
+        .status {
+            padding: 12px;
+            text-align: center;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 8px;
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 16px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <div class="avatar" id="avatar">👤</div>
-            <h1 id="username">Мои данные</h1>
-            <p>Информация о вашем профиле</p>
+        <!-- Профиль -->
+        <div id="profile-tab" class="tab-content active">
+            <div class="header">
+                <div class="avatar" id="avatar">
+                    <div class="avatar-placeholder" id="avatarPlaceholder">👤</div>
+                    <img id="avatarImg" style="display: none;" alt="Avatar">
+                </div>
+                <h1 id="username">Мои данные</h1>
+                <p>Информация о вашем профиле</p>
+            </div>
+
+            <div id="loading" class="loading">
+                Загрузка данных...
+            </div>
+
+            <div id="error" class="error" style="display: none;">
+                Ошибка загрузки данных
+            </div>
+
+            <div id="userData" style="display: none;">
+                <div class="data-card">
+                    <div class="data-row">
+                        <span class="data-label">ID пользователя</span>
+                        <span class="data-value" id="userId">-</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Имя</span>
+                        <span class="data-value" id="firstName">-</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Фамилия</span>
+                        <span class="data-value" id="lastName">-</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Username</span>
+                        <span class="data-value" id="userUsername">-</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Язык</span>
+                        <span class="data-value" id="languageCode">-</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Premium</span>
+                        <span class="data-value" id="isPremium">-</span>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-row">
+                        <span class="data-label">Платформа</span>
+                        <span class="data-value" id="platform">-</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Версия</span>
+                        <span class="data-value" id="version">-</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Тема</span>
+                        <span class="data-value" id="colorScheme">-</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div id="loading" class="loading">
-            Загрузка данных...
-        </div>
+        <!-- Статистика -->
+        <div id="stats-tab" class="tab-content">
+            <div class="header">
+                <h1>📊 Статистика</h1>
+                <p>Ваша активность в приложении</p>
+            </div>
 
-        <div id="error" class="error" style="display: none;">
-            Ошибка загрузки данных
-        </div>
-
-        <div id="userData" style="display: none;">
-            <div class="data-card">
-                <div class="data-row">
-                    <span class="data-label">ID пользователя</span>
-                    <span class="data-value" id="userId">-</span>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-value" id="visitCount">1</span>
+                    <span class="stat-label">Посещений</span>
                 </div>
-                <div class="data-row">
-                    <span class="data-label">Имя</span>
-                    <span class="data-value" id="firstName">-</span>
+                <div class="stat-card">
+                    <span class="stat-value" id="daysSinceJoin">-</span>
+                    <span class="stat-label">Дней в Telegram</span>
                 </div>
-                <div class="data-row">
-                    <span class="data-label">Фамилия</span>
-                    <span class="data-value" id="lastName">-</span>
+                <div class="stat-card">
+                    <span class="stat-value" id="currentTime">--:--</span>
+                    <span class="stat-label">Текущее время</span>
                 </div>
-                <div class="data-row">
-                    <span class="data-label">Username</span>
-                    <span class="data-value" id="userUsername">-</span>
-                </div>
-                <div class="data-row">
-                    <span class="data-label">Язык</span>
-                    <span class="data-value" id="languageCode">-</span>
-                </div>
-                <div class="data-row">
-                    <span class="data-label">Premium</span>
-                    <span class="data-value" id="isPremium">-</span>
+                <div class="stat-card">
+                    <span class="stat-value" id="sessionTime">00:00</span>
+                    <span class="stat-label">Времени в сессии</span>
                 </div>
             </div>
 
             <div class="data-card">
-                <div class="data-row">
-                    <span class="data-label">Платформа</span>
-                    <span class="data-value" id="platform">-</span>
+                <button class="action-button" onclick="shareApp()">
+                    📤 Поделиться приложением
+                </button>
+                <button class="action-button" onclick="showAlert()">
+                    🔔 Показать уведомление
+                </button>
+                <button class="action-button" onclick="vibrate()">
+                    📳 Вибрация
+                </button>
+            </div>
+        </div>
+
+        <!-- Настройки -->
+        <div id="settings-tab" class="tab-content">
+            <div class="header">
+                <h1>⚙️ Настройки</h1>
+                <p>Конфигурация приложения</p>
+            </div>
+
+            <div class="data-card">
+                <div class="settings-item" onclick="toggleTheme()">
+                    <div class="settings-icon">🎨</div>
+                    <div class="settings-content">
+                        <div class="settings-title">Тема оформления</div>
+                        <div class="settings-description">Переключить цветовую схему</div>
+                    </div>
                 </div>
-                <div class="data-row">
-                    <span class="data-label">Версия</span>
-                    <span class="data-value" id="version">-</span>
+                
+                <div class="settings-item" onclick="copyUserId()">
+                    <div class="settings-icon">📋</div>
+                    <div class="settings-content">
+                        <div class="settings-title">Копировать ID</div>
+                        <div class="settings-description">Скопировать ваш ID в буфер обмена</div>
+                    </div>
                 </div>
-                <div class="data-row">
-                    <span class="data-label">Тема</span>
-                    <span class="data-value" id="colorScheme">-</span>
+
+                <div class="settings-item" onclick="clearData()">
+                    <div class="settings-icon">🗑️</div>
+                    <div class="settings-content">
+                        <div class="settings-title">Очистить данные</div>
+                        <div class="settings-description">Сбросить локальную статистику</div>
+                    </div>
+                </div>
+
+                <div class="settings-item" onclick="showAppInfo()">
+                    <div class="settings-icon">ℹ️</div>
+                    <div class="settings-content">
+                        <div class="settings-title">О приложении</div>
+                        <div class="settings-description">Информация о версии</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -183,35 +437,52 @@
         </div>
     </div>
 
+    <!-- Навигация -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('profile')">
+            <div class="nav-icon">👤</div>
+            <div class="nav-label">Профиль</div>
+        </div>
+        <div class="nav-item" onclick="switchTab('stats')">
+            <div class="nav-icon">📊</div>
+            <div class="nav-label">Статистика</div>
+        </div>
+        <div class="nav-item" onclick="switchTab('settings')">
+            <div class="nav-icon">⚙️</div>
+            <div class="nav-label">Настройки</div>
+        </div>
+    </div>
+
     <script>
-        // Инициализация Telegram Web App
         let tg = window.Telegram.WebApp;
+        let currentUser = null;
+        let sessionStartTime = Date.now();
 
         function initApp() {
             try {
-                // Расширяем окно на весь экран
                 tg.expand();
-                
-                // Включаем кнопку закрытия
                 tg.enableClosingConfirmation();
 
-                // Получаем данные пользователя
                 const user = tg.initDataUnsafe?.user;
-                const webAppData = tg.initData;
-
+                
                 if (user) {
+                    currentUser = user;
                     displayUserData(user);
+                    loadUserPhoto(user.id);
+                    updateVisitCount();
                 } else {
                     showError("Данные пользователя недоступны");
                 }
 
-                // Отображаем информацию о платформе
                 displayPlatformData();
-
-                // Уведомляем Telegram, что приложение готово
+                updateStats();
                 tg.ready();
 
                 document.getElementById('status').textContent = 'Приложение загружено';
+
+                // Обновляем время каждую секунду
+                setInterval(updateTime, 1000);
+                setInterval(updateSessionTime, 1000);
 
             } catch (error) {
                 console.error('Ошибка инициализации:', error);
@@ -220,26 +491,52 @@
         }
 
         function displayUserData(user) {
-            const avatar = document.getElementById('avatar');
+            const avatarPlaceholder = document.getElementById('avatarPlaceholder');
             const username = document.getElementById('username');
 
-            // Устанавливаем аватар (первая буква имени)
             if (user.first_name) {
-                avatar.textContent = user.first_name.charAt(0).toUpperCase();
+                avatarPlaceholder.textContent = user.first_name.charAt(0).toUpperCase();
                 username.textContent = user.first_name;
             }
 
-            // Заполняем данные
             document.getElementById('userId').textContent = user.id || '-';
             document.getElementById('firstName').textContent = user.first_name || '-';
             document.getElementById('lastName').textContent = user.last_name || '-';
             document.getElementById('userUsername').textContent = user.username ? '@' + user.username : '-';
             document.getElementById('languageCode').textContent = user.language_code || '-';
-            document.getElementById('isPremium').textContent = user.is_premium ? 'Да' : 'Нет';
+            document.getElementById('isPremium').textContent = user.is_premium ? 'Да ⭐' : 'Нет';
 
-            // Показываем данные
             document.getElementById('loading').style.display = 'none';
             document.getElementById('userData').style.display = 'block';
+        }
+
+        function loadUserPhoto(userId) {
+            // В реальном приложении здесь бы был запрос к API Telegram для получения фото
+            // Для демонстрации используем заглушку
+            const avatarImg = document.getElementById('avatarImg');
+            const placeholder = document.getElementById('avatarPlaceholder');
+            
+            // Попытка загрузить аватар через API (в реальности нужен токен бота)
+            // const photoUrl = `https://api.telegram.org/bot<TOKEN>/getUserProfilePhotos?user_id=${userId}`;
+            
+            // Пример с случайным аватаром для демонстрации
+            const demoAvatars = [
+                'https://i.pravatar.cc/160?u=' + userId,
+                'https://robohash.org/' + userId + '?set=set1&size=160x160'
+            ];
+            
+            const randomAvatar = demoAvatars[Math.floor(Math.random() * demoAvatars.length)];
+            
+            avatarImg.src = randomAvatar;
+            avatarImg.onload = function() {
+                placeholder.style.display = 'none';
+                avatarImg.style.display = 'block';
+            };
+            
+            avatarImg.onerror = function() {
+                // Если не удалось загрузить, оставляем заглушку
+                console.log('Не удалось загрузить аватар');
+            };
         }
 
         function displayPlatformData() {
@@ -248,17 +545,127 @@
             document.getElementById('colorScheme').textContent = tg.colorScheme || '-';
         }
 
+        function updateStats() {
+            const visitCount = getVisitCount();
+            document.getElementById('visitCount').textContent = visitCount;
+            
+            if (currentUser && currentUser.id) {
+                // Примерный расчет дней с момента создания аккаунта (условно)
+                const daysSinceJoin = Math.floor(Math.abs(Date.now() - (currentUser.id * 1000)) / (1000 * 60 * 60 * 24));
+                document.getElementById('daysSinceJoin').textContent = daysSinceJoin > 10000 ? '1000+' : daysSinceJoin;
+            }
+        }
+
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'});
+            document.getElementById('currentTime').textContent = timeString;
+        }
+
+        function updateSessionTime() {
+            const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('sessionTime').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function getVisitCount() {
+            let count = localStorage.getItem('visitCount') || 0;
+            return parseInt(count);
+        }
+
+        function updateVisitCount() {
+            let count = getVisitCount() + 1;
+            localStorage.setItem('visitCount', count);
+            return count;
+        }
+
+        function switchTab(tabName) {
+            // Скрываем все табы
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Показываем выбранный таб
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Обновляем навигацию
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+
+        function shareApp() {
+            if (tg.platform !== 'unknown') {
+                tg.shareUrl('https://t.me/your_bot_name/your_app', 'Попробуйте это приложение!');
+            } else {
+                alert('Функция доступна только в Telegram');
+            }
+        }
+
+        function showAlert() {
+            if (tg.platform !== 'unknown') {
+                tg.showAlert('Это уведомление из Mini App! 🎉');
+            } else {
+                alert('Это уведомление из Mini App! 🎉');
+            }
+        }
+
+        function vibrate() {
+            if (tg.platform !== 'unknown') {
+                tg.HapticFeedback.impactOccurred('medium');
+            } else if (navigator.vibrate) {
+                navigator.vibrate(200);
+            } else {
+                alert('Вибрация не поддерживается');
+            }
+        }
+
+        function toggleTheme() {
+            tg.showConfirm('Переключить тему оформления?', (result) => {
+                if (result) {
+                    // В реальном приложении здесь была бы смена темы
+                    tg.showAlert('Тема будет изменена при следующем запуске');
+                }
+            });
+        }
+
+        function copyUserId() {
+            if (currentUser && currentUser.id) {
+                navigator.clipboard.writeText(currentUser.id.toString()).then(() => {
+                    tg.showAlert('ID скопирован в буфер обмена');
+                }).catch(() => {
+                    tg.showAlert('Не удалось скопировать ID');
+                });
+            }
+        }
+
+        function clearData() {
+            tg.showConfirm('Очистить все локальные данные?', (result) => {
+                if (result) {
+                    localStorage.clear();
+                    sessionStartTime = Date.now();
+                    updateStats();
+                    tg.showAlert('Данные очищены');
+                }
+            });
+        }
+
+        function showAppInfo() {
+            tg.showAlert('Mini App v1.0\nСоздано для демонстрации возможностей Telegram Web App API');
+        }
+
         function showError(message) {
             document.getElementById('loading').style.display = 'none';
             document.getElementById('error').style.display = 'block';
             document.getElementById('error').textContent = message;
         }
 
-        // Инициализация при загрузке страницы
+        // Инициализация
         if (window.Telegram && window.Telegram.WebApp) {
             initApp();
         } else {
-            // Если скрипт Telegram не загружен, показываем демо-данные
+            // Демо-режим
             setTimeout(() => {
                 const demoUser = {
                     id: 123456789,
@@ -268,11 +675,17 @@
                     language_code: "ru",
                     is_premium: false
                 };
+                currentUser = demoUser;
                 displayUserData(demoUser);
+                loadUserPhoto(demoUser.id);
                 document.getElementById('platform').textContent = 'Demo';
                 document.getElementById('version').textContent = '7.0';
                 document.getElementById('colorScheme').textContent = 'light';
                 document.getElementById('status').textContent = 'Демо-режим (откройте в Telegram)';
+                updateStats();
+                updateTime();
+                setInterval(updateTime, 1000);
+                setInterval(updateSessionTime, 1000);
             }, 1000);
         }
     </script>
