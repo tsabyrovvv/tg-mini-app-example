@@ -21,7 +21,11 @@ class TelegramUser(models.Model):
     
     @property
     def days_since_join(self):
-        return (timezone.now() - self.created_at).days
+        """Количество дней с момента регистрации"""
+        if self.created_at:
+            delta = timezone.now() - self.created_at
+            return delta.days
+        return 0
 
 class UserSession(models.Model):
     user = models.ForeignKey(TelegramUser, on_delete=models.CASCADE)
@@ -32,6 +36,13 @@ class UserSession(models.Model):
     
     def __str__(self):
         return f"Сессия {self.user.first_name} - {self.session_start}"
+    
+    @property
+    def duration(self):
+        """Длительность сессии"""
+        if self.session_end:
+            return self.session_end - self.session_start
+        return timezone.now() - self.session_start
 
 class UserStats(models.Model):
     user = models.OneToOneField(TelegramUser, on_delete=models.CASCADE)
@@ -41,4 +52,12 @@ class UserStats(models.Model):
     
     def __str__(self):
         return f"Статистика {self.user.first_name}"
+    
+    @property
+    def days_since_first_visit(self):
+        """Дней с первого посещения"""
+        if self.user.created_at:
+            delta = timezone.now() - self.user.created_at
+            return delta.days
+        return 0
     

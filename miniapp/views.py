@@ -128,6 +128,7 @@ def get_user_data(request, user_id):
         return JsonResponse({
             'user': {
                 'id': user.telegram_id,
+                'telegram_id': user.telegram_id,
                 'first_name': user.first_name,
                 'last_name': user.last_name,
                 'username': user.username,
@@ -135,11 +136,13 @@ def get_user_data(request, user_id):
                 'is_premium': user.is_premium,
                 'full_name': user.full_name,
                 'days_since_join': user.days_since_join,
+                'member_since': user.created_at.isoformat(),
             },
             'stats': {
                 'total_visits': stats.total_visits,
-                'last_visit': stats.last_visit.isoformat(),
+                'last_visit': stats.last_visit.isoformat() if stats.last_visit else timezone.now().isoformat(),
                 'member_since': user.created_at.isoformat(),
+                'days_since_first_visit': stats.days_since_first_visit,
             }
         })
     except Exception as e:
