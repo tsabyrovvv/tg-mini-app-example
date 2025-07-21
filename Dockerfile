@@ -23,6 +23,8 @@ RUN mkdir -p staticfiles media
 # Собираем статические файлы
 RUN python manage.py collectstatic --noinput
 
+# Создаем миграции
+RUN python manage.py makemigrations
 # Применяем миграции
 RUN python manage.py migrate
 
