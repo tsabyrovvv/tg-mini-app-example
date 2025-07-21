@@ -74,7 +74,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Telegram настройки
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
-TELEGRAM_BOT_SECRET = os.environ.get('TELEGRAM_BOT_SECRET', '')
 
 # Для Telegram Mini Apps
 X_FRAME_OPTIONS = 'ALLOWALL'

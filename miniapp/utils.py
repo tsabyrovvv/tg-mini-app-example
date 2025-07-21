@@ -5,14 +5,14 @@ from urllib.parse import parse_qsl
 from django.conf import settings
 
 def validate_telegram_data(init_data):
-    """Валидация данных от Telegram WebApp"""
     try:
         parsed_data = dict(parse_qsl(init_data))
         hash_value = parsed_data.pop('hash', '')
         
         data_check_string = '\n'.join([f'{k}={v}' for k, v in sorted(parsed_data.items())])
+        
         secret_key = hmac.new(
-            settings.TELEGRAM_BOT_TOKEN.encode(),
+            settings.TELEGRAM_BOT_TOKEN.encode(), 
             b"WebAppData",
             hashlib.sha256
         ).digest()
