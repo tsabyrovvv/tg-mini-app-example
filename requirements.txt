@@ -1,0 +1,6 @@
+Django
+python-telegram-bot
+cryptography
+requests
+gunicorn
+whitenoise
