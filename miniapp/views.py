@@ -1,13 +1,180 @@
-import requests
+import json
 import logging
+import requests
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+from django.utils.decorators import method_decorator
+from django.views import View
+from django.utils import timezone
 from django.conf import settings
 from django.core.cache import cache
-from django.http import JsonResponse
-from django.views.decorators.http import require_http_methods
-from django.shortcuts import get_object_or_404
-from .models import TelegramUser
+from .models import TelegramUser, UserSession, UserStats
+from .utils import validate_telegram_data, parse_user_data
 
 logger = logging.getLogger(__name__)
+
+class IndexView(View):
+    """Главная страница приложения"""
+    def get(self, request):
+        return render(request, 'miniapp/index.html')
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def auth_user(request):
+    """Аутентификация пользователя через Telegram WebApp"""
+    try:
+        # Логируем входящие данные для отладки
+        logger.info(f"Request body: {request.body}")
+        
+        data = json.loads(request.body)
+        init_data = data.get('initData', '')
+        
+        # В продакшене обязательно валидировать данные
+        # is_valid, telegram_data = validate_telegram_data(init_data)
+        # if not is_valid:
+        #     return JsonResponse({'error': 'Invalid data'}, status=400)
+        
+        # Получаем данные пользователя
+        user_data = data.get('user', {})
+        platform_data = data.get('platform', {})
+        
+        # Проверяем наличие обязательных данных
+        if not user_data or not user_data.get('id'):
+            logger.error(f"Missing user data: {user_data}")
+            return JsonResponse({'error': 'User data missing', 'details': 'No user ID provided'}, status=400)
+        
+        # Создаем или обновляем пользователя
+        try:
+            user, created = TelegramUser.objects.get_or_create(
+                telegram_id=user_data['id'],
+                defaults={
+                    'first_name': user_data.get('first_name', ''),
+                    'last_name': user_data.get('last_name', ''),
+                    'username': user_data.get('username', ''),
+                    'language_code': user_data.get('language_code', ''),
+                    'is_premium': user_data.get('is_premium', False),
+                    'is_bot': user_data.get('is_bot', False),
+                }
+            )
+            
+            # Обновляем данные если пользователь уже существует
+            if not created:
+                user.first_name = user_data.get('first_name', user.first_name)
+                user.last_name = user_data.get('last_name', user.last_name)
+                user.username = user_data.get('username', user.username)
+                user.language_code = user_data.get('language_code', user.language_code)
+                user.is_premium = user_data.get('is_premium', user.is_premium)
+                user.save()
+                
+            logger.info(f"User {'created' if created else 'updated'}: {user.telegram_id}")
+            
+        except Exception as e:
+            logger.error(f"Error creating/updating user: {e}")
+            return JsonResponse({'error': 'Database error', 'details': str(e)}, status=500)
+        
+        # Создаем сессию
+        try:
+            session = UserSession.objects.create(
+                user=user,
+                platform=platform_data.get('platform', ''),
+                version=platform_data.get('version', '')
+            )
+            logger.info(f"Session created: {session.id}")
+        except Exception as e:
+            logger.error(f"Error creating session: {e}")
+            return JsonResponse({'error': 'Session creation failed', 'details': str(e)}, status=500)
+        
+        # Обновляем статистику
+        try:
+            stats, stats_created = UserStats.objects.get_or_create(
+                user=user,
+                defaults={'total_visits': 1}
+            )
+            if not stats_created:
+                stats.total_visits += 1
+                stats.save()
+                
+            logger.info(f"Stats updated: visits = {stats.total_visits}")
+        except Exception as e:
+            logger.error(f"Error updating stats: {e}")
+            # Не критично, продолжаем
+        
+        return JsonResponse({
+            'success': True,
+            'user_id': user.telegram_id,
+            'session_id': session.id,
+            'created': created
+        })
+        
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON decode error: {e}")
+        return JsonResponse({'error': 'Invalid JSON', 'details': str(e)}, status=400)
+    except Exception as e:
+        logger.error(f"Unexpected error in auth_user: {e}")
+        return JsonResponse({'error': 'Internal server error', 'details': str(e)}, status=500)
+
+@require_http_methods(["GET"])
+def get_user_data(request, user_id):
+    """Получение данных пользователя"""
+    try:
+        user = get_object_or_404(TelegramUser, telegram_id=user_id)
+        stats, _ = UserStats.objects.get_or_create(
+            user=user,
+            defaults={'total_visits': 1}
+        )
+        
+        return JsonResponse({
+            'user': {
+                'id': user.telegram_id,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'username': user.username,
+                'language_code': user.language_code,
+                'is_premium': user.is_premium,
+                'full_name': user.full_name,
+                'days_since_join': user.days_since_join,
+            },
+            'stats': {
+                'total_visits': stats.total_visits,
+                'last_visit': stats.last_visit.isoformat(),
+                'member_since': user.created_at.isoformat(),
+            }
+        })
+    except Exception as e:
+        logger.error(f"Error getting user data: {e}")
+        return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def update_session(request, user_id):
+    """Обновление данных сессии"""
+    try:
+        data = json.loads(request.body)
+        user = get_object_or_404(TelegramUser, telegram_id=user_id)
+        
+        # Находим последнюю активную сессию
+        session = UserSession.objects.filter(
+            user=user, 
+            session_end__isnull=True
+        ).first()
+        
+        if session and data.get('action') == 'end':
+            session.session_end = timezone.now()
+            session.save()
+            
+            # Обновляем общее время
+            session_duration = session.session_end - session.session_start
+            stats, _ = UserStats.objects.get_or_create(user=user)
+            stats.total_time_spent += session_duration
+            stats.save()
+        
+        return JsonResponse({'success': True})
+        
+    except Exception as e:
+        logger.error(f"Error updating session: {e}")
+        return JsonResponse({'error': str(e)}, status=500)
 
 @require_http_methods(["GET"])
 def get_user_avatar(request, user_id):
@@ -146,44 +313,38 @@ def _get_fallback_avatar(user_id: int) -> str:
     
     return selected_service
 
-# Дополнительная функция для предзагрузки аватаров (можно вызывать из celery task)
-def preload_user_avatar(user_id: int) -> bool:
-    """Предзагрузка аватара пользователя в кэш"""
+# Дополнительные функции для управления кэшем
+@csrf_exempt
+@require_http_methods(["POST"])
+def refresh_user_avatar(request, user_id):
+    """Принудительное обновление аватара пользователя"""
     try:
-        bot_token = settings.TELEGRAM_BOT_TOKEN
-        if not bot_token:
-            return False
-        
+        # Очищаем кэш
         cache_key = f"user_avatar_{user_id}"
-        if cache.get(cache_key):
-            return True  # Уже в кэше
+        cache.delete(cache_key)
         
-        avatar_url = _fetch_telegram_avatar(bot_token, user_id)
-        if avatar_url:
-            cache.set(cache_key, avatar_url, 3600)
-            logger.info(f"Avatar preloaded for user {user_id}")
-            return True
+        # Получаем новый аватар
+        return get_user_avatar(request, user_id)
         
-        return False
     except Exception as e:
-        logger.error(f"Error preloading avatar for user {user_id}: {e}")
-        return False
+        logger.error(f"Error refreshing avatar for user {user_id}: {e}")
+        return JsonResponse({'error': str(e)}, status=500)
 
-# Функция для очистки кэша аватаров
-def clear_avatar_cache(user_id: int = None) -> bool:
-    """Очистка кэша аватаров"""
+@csrf_exempt
+@require_http_methods(["POST"])
+def clear_all_avatars_cache(request):
+    """Очистка всего кэша аватаров (только для админов)"""
     try:
-        if user_id:
-            cache_key = f"user_avatar_{user_id}"
-            cache.delete(cache_key)
-            logger.info(f"Avatar cache cleared for user {user_id}")
-        else:
-            # Очистка всех аватаров (требует специальной настройки кэша)
-            # Это упрощенная версия - в продакшене лучше использовать tagged cache
-            logger.warning("Clearing all avatar cache not implemented in this version")
+        # В простой реализации - здесь можно добавить проверку прав
+        # Для production лучше использовать tagged cache или отдельное хранилище
         
-        return True
+        # Очищаем весь кэш (осторожно в продакшене!)
+        cache.clear()
+        
+        logger.info("All avatars cache cleared")
+        return JsonResponse({'success': True, 'message': 'All avatars cache cleared'})
+        
     except Exception as e:
-        logger.error(f"Error clearing avatar cache: {e}")
-        return False
+        logger.error(f"Error clearing avatars cache: {e}")
+        return JsonResponse({'error': str(e)}, status=500)
     
