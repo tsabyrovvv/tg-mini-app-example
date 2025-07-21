@@ -709,20 +709,55 @@
         }
 
         function copyUserId() {
-            if (currentUser && currentUser.id) {
-                navigator.clipboard.writeText(currentUser.id.toString()).then(() => {
-                    if (tg.platform !== 'unknown') {
-                        tg.showAlert('ID скопирован в буфер обмена');
+            if (!currentUser || !currentUser.id) {
+                alert('ID пользователя недоступен');
+                return;
+            }
+            
+            const userId = currentUser.id.toString();
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(userId).then(() => {
+                    if (window.Telegram && window.Telegram.WebApp && tg.platform !== 'unknown') {
+                        try {
+                            tg.showAlert('ID скопирован в буфер обмена');
+                        } catch (error) {
+                            alert('ID скопирован в буфер обмена');
+                        }
                     } else {
                         alert('ID скопирован в буфер обмена');
                     }
                 }).catch(() => {
-                    if (tg.platform !== 'unknown') {
-                        tg.showAlert('Не удалось скопировать ID');
-                    } else {
-                        alert('Не удалось скопировать ID');
+                    // Fallback копирование
+                    const tempInput = document.createElement('input');
+                    tempInput.value = userId;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    
+                    try {
+                        document.execCommand('copy');
+                        alert('ID скопирован в буфер обмена');
+                    } catch (error) {
+                        alert(`Не удалось скопировать. ID: ${userId}`);
                     }
+                    
+                    document.body.removeChild(tempInput);
                 });
+            } else {
+                // Fallback для старых браузеров
+                const tempInput = document.createElement('input');
+                tempInput.value = userId;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                
+                try {
+                    document.execCommand('copy');
+                    alert('ID скопирован в буфер обмена');
+                } catch (error) {
+                    alert(`ID пользователя: ${userId}\n\nСкопируйте вручную`);
+                }
+                
+                document.body.removeChild(tempInput);
             }
         }
 
